@@ -2,6 +2,9 @@ package routes
 
 import (
 	"time"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/gofiber/fiber/v2"
 )
 
 type request struct {
@@ -17,4 +20,30 @@ type response struct {
 	// keeps front end from making too many resets
 	XRateRemaining  int           `json:"rate_limit"`
 	XRateLimitReset time.Duration `json:"rate_limit_reset"`
+}
+
+func ShortenURL(c *fiber.Ctx) error {
+
+	body := new(request)
+
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot Past JSON"})
+	}
+
+	// implement some rate limiting
+
+	// check if input sent by user is actual url
+
+	if !govalidator.IsURL(body.URL) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid URL"})
+	}
+
+	// check for domain error
+
+	if !helpers.RemoveDomainError(body.URL) {
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "Invalid URL"})
+	}
+
+	// enforce https, SSL
+	body.URL = helpers.EnforceHTTP(body.URL)
 }
