@@ -1,0 +1,13 @@
+# Ignore Go modules and binaries
+bin/
+*.exe
+*.out
+*.log
+
+# Ignore dependencies
+vendor/
+go.sum
+go.mod
+
+# Ignore environment files
+.env
